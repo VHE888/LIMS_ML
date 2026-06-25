@@ -5,7 +5,7 @@
 This is a Laboratory Information Management System (LIMS) built for NGS sequencing platforms.
 
 It tracks everything from:
-- client project intake  
+- client submission intake  
 - submitted samples  
 - aliquots and libraries  
 - pooling and sequencing runs  
@@ -25,6 +25,7 @@ In short, it helps a sequencing core lab keep track of **where every sample is, 
 - `Organization`
 - `Client`
 - `Project`
+- `Submission`
 - `User`
 
 ### Wet lab sample tracking
@@ -32,7 +33,6 @@ In short, it helps a sequencing core lab keep track of **where every sample is, 
 - `Aliquot`
 - `StorageLocation`
 - `SampleLocationHistory`
-- `SampleEvent`
 
 ### Library + sequencing workflow
 - `Library`
@@ -45,25 +45,43 @@ In short, it helps a sequencing core lab keep track of **where every sample is, 
 - `QCResult`
 - `Equipment`
 
-## 4. Relations
+## 4. Table Relationships
+
+```text
+Organization
+      ↓
+Client
+      ↓
+Project
+      ↓
+Submission
+      ↓
+Sample
+      ↓
+Aliquot
+      ↓
+Library
+      ↓
+Pool
+      ↓
+Sequencing Run
+      ↓
+Data Files
+```
 
 ### Key relationships
 
-- A **Client** belongs to one Organization
-- A **Project** belongs to one Client as the main contactors
-- A **Sample** belongs to one Project
-- A **Sample** can generate multiple **Aliquots**
-- An **Aliquot** can be used to build a **Library**
+- **Client** belongs to one **Organization**
+- **Project** belongs to one **Client** as the main contactors
+- **Sample** belongs to one **Submission**
+- **Sample** can generate multiple **Aliquots**
+- **Aliquot** can be used to build a **Library**
+- **QCResult** records quality control metrics for each library.
 - Multiple **Libraries** can be pooled together with barcoding
-- A **Pool** is sequenced in a **SequencingRun**
-- A **SequencingRun** generates **DataFiles**
+- **Pool** is sequenced in a **SequencingRun**
+- **SequencingRun** generates **DataFiles**
 
-### QC + tracking
+### Tracking
 
-- `QCResult` links to Library (and optionally Equipment)
-- `SampleEvent` tracks what happened to an aliquot over time
-- `SampleLocationHistory` tracks storage movement
-
-## Notes
-
-- Storage and event tables are added for traceability and lab management.
+- **StorageLocation** and **SampleLocationHistory** track aliquot storage and movement.
+- **User** records personnel responsible for laboratory operations.

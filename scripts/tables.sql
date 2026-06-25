@@ -50,9 +50,42 @@ CREATE TABLE Project (
         REFERENCES Client(client_id)
 );
 
+CREATE TABLE Submission (
+    submission_id INT AUTO_INCREMENT PRIMARY KEY,
+    project_id INT NOT NULL,
+    library_prep_required BOOLEAN DEFAULT FALSE,
+    rna_extraction_required BOOLEAN DEFAULT FALSE,
+    library_prep_kit VARCHAR(255),
+    rna_extraction_kit VARCHAR(255),
+    custom_sequencing_primer BOOLEAN DEFAULT FALSE,
+    custom_primer VARCHAR(255),
+    requested_sequencer VARCHAR(100),
+    num_requested_lanes INT,
+    multiplex BOOLEAN DEFAULT FALSE,
+    samples_per_lane INT,
+    read_length VARCHAR(50),
+    alignment_required BOOLEAN DEFAULT FALSE,
+    reference_genome VARCHAR(100),
+    alignment_program VARCHAR(100),
+    billing_comments TEXT,
+    other_comments TEXT,
+    submitted_date DATETIME DEFAULT CURRENT_TIMESTAMP,
+
+    status ENUM(
+        'Pending',
+        'Approved',
+        'In Progress',
+        'Completed',
+        'Cancelled'
+    ) DEFAULT 'Pending',
+
+    FOREIGN KEY (project_id)
+        REFERENCES Project(project_id)
+);
+
 CREATE TABLE Sample (
     sample_id INT AUTO_INCREMENT PRIMARY KEY,
-    project_id INT NOT NULL,
+    submission_id INT NOT NULL,
     sample_name VARCHAR(255) NOT NULL,
     sample_type VARCHAR(100),
     species VARCHAR(100),
@@ -73,8 +106,8 @@ CREATE TABLE Sample (
         'Disposed'
     ) DEFAULT 'Awaiting Receipt',
 
-    FOREIGN KEY (project_id)
-        REFERENCES Project(project_id)
+    FOREIGN KEY (submission_id)
+        REFERENCES Submission(submission_id)
 );
 
 CREATE TABLE Aliquot (
@@ -131,21 +164,6 @@ CREATE TABLE SampleLocationHistory (
         REFERENCES User(user_id)
 );
 
-CREATE TABLE SampleEvent (
-    event_id INT AUTO_INCREMENT PRIMARY KEY,
-    aliquot_id INT NOT NULL,
-    event_type VARCHAR(100),
-    event_date DATETIME,
-    personnel INT,
-    notes TEXT,
-
-    FOREIGN KEY (aliquot_id)
-        REFERENCES Aliquot(aliquot_id),
-
-    FOREIGN KEY (personnel)
-        REFERENCES User(user_id)
-);
-
 CREATE TABLE Equipment (
     equipment_id INT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(255),
@@ -185,7 +203,8 @@ CREATE TABLE Library (
     index1 VARCHAR(100),
     index2 VARCHAR(100),
     concentration DECIMAL(10,2),
-    insert_size INT,
+    fragment_size_min INT,
+    fragment_size_max INT,
 
     status ENUM(
         'Created',
